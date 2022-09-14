@@ -20,10 +20,10 @@ class AlbumsHandler {
   }
 
   /**
-   *
-   * @param {} request
-   * @param {*} h
-   * @return
+   * For handling POST request to /albums endpoint
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async postAlbumHandler(request, h) {
     try {
@@ -49,10 +49,10 @@ class AlbumsHandler {
   }
 
   /**
-   *
-   * @param {*} request
-   * @param {*} h
-   * @returns
+   * For handling GET request to /albums endpoint with id
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async getAlbumByIdHandler(request, h) {
     try {
@@ -74,10 +74,10 @@ class AlbumsHandler {
   }
 
   /**
-   *
+   * For handling PUT request to /albums endpoint with id
    * @param {Hapi.Request} request
    * @param {Hapi.ResponseToolkit} h
-   * @returns
+   * @return {Hapi.ResponseToolkit}
    */
   async putAlbumByIdHandler(request, h) {
     try {
@@ -99,10 +99,10 @@ class AlbumsHandler {
   }
 
   /**
-   *
-   * @param {*} request
-   * @param {*} h
-   * @returns
+   * For handling DELETE request to /albums endpoint with id
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async deleteAlbumByIdHandler(request, h) {
     try {

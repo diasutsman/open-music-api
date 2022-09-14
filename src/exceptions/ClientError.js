@@ -1,11 +1,10 @@
 /**
- * ClientError as custom error when client error
+ * ClientError as custom error when there is a client error
  */
 class ClientError extends Error {
   /**
-   *
-   * @param {*} message
-   * @param {*} code
+   * @param {string} message
+   * @param {number} code
    */
   constructor(message, code = 400) {
     super(message);

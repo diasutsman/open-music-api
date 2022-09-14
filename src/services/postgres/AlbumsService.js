@@ -15,9 +15,9 @@ class AlbumsService {
   }
 
   /**
-   *
-   * @param {*} param0
-   * @returns
+   * Add new album to database and return its id
+   * @param {{name: string, year: number}} postReqBody
+   * @return {string}
    */
   async addAlbum({name, year}) {
     const id = `album-${nanoid(16)}`;
@@ -36,9 +36,9 @@ class AlbumsService {
     return result.rows[0].id;
   }
   /**
-   *
-   * @param {*} id
-   * @returns
+   * Get album by id
+   * @param {string} id
+   * @return {any}
    */
   async getAlbumById(id) {
     const query = {
@@ -65,9 +65,9 @@ class AlbumsService {
     return album;
   }
   /**
-   *
-   * @param {*} id
-   * @param {*} param1
+   * Edit album by id
+   * @param {string} id
+   * @param {{name: string, year: number}} putReqBody
    */
   async editAlbumById(id, {name, year}) {
     const query = {
@@ -82,8 +82,8 @@ class AlbumsService {
     }
   }
   /**
-   *
-   * @param {*} id
+   * Delete album by id
+   * @param {string} id
    */
   async deleteAlbumById(id) {
     const query = {

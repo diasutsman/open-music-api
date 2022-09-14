@@ -1,6 +1,6 @@
 const ClientError = require('./ClientError');
 /**
- * NotFoundError as custom error when not found error
+ * NotFoundError as custom error when there is not found error
  */
 class NotFoundError extends ClientError {
   /**

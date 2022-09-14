@@ -15,11 +15,25 @@ class SongsService {
   }
 
   /**
-   *
-   * @param {*} param0
-   * @returns
+   * Add new song to database and return its id
+   * @param {{
+   *   title: string,
+   *   year: string,
+   *   genre: string,
+   *   performer: string,
+   *   duration : string?,
+   *   albumId : string?,
+   * }} postReqBody
+   * @return {string}
    */
-  async addSong({title, year, genre, performer, duration = null, albumId = null}) {
+  async addSong({
+    title,
+    year,
+    genre,
+    performer,
+    duration = null,
+    albumId = null,
+  }) {
     const id = `song-${nanoid(16)}`;
 
     const query = {
@@ -37,9 +51,9 @@ class SongsService {
   }
 
   /**
-   *
-   * @param {*} param0
-   * @returns
+   * Get all songs from database and filtered it by query
+   * @param {{title: string, performer: string}} queryObj
+   * @return {any[]}
    */
   async getSongs({title = '', performer = ''}) {
     const query = {
@@ -54,9 +68,9 @@ class SongsService {
   }
 
   /**
-   *
-   * @param {*} id
-   * @returns
+   * Get song by id
+   * @param {string} id
+   * @return {any}
    */
   async getSongById(id) {
     const query = {
@@ -74,9 +88,16 @@ class SongsService {
   }
 
   /**
-   *
-   * @param {*} id
-   * @param {*} param1
+   * Edit song by id
+   * @param {string} id
+   * @param {{
+   *   title: string,
+   *   year: string,
+   *   genre: string,
+   *   performer: string,
+   *   duration : string?,
+   *   albumId : string?,
+   * }} putReqBody
    */
   async editSongById(id, {title,
     year,
@@ -103,8 +124,8 @@ class SongsService {
   }
 
   /**
-   *
-   * @param {*} id
+   * Delete song by id
+   * @param {string} id
    */
   async deleteSongById(id) {
     const query = {

@@ -21,10 +21,10 @@ class SongsHandler {
     this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
   }
   /**
-   *
-   * @param {Hapi} request
-   * @param {*} h
-   * @returns
+   * For handling POST request to /songs endpoint
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async postSongHandler(request, h) {
     try {
@@ -50,7 +50,11 @@ class SongsHandler {
         serverErrorResponse(error, h);
     }
   }
-
+  /**
+   * For handling GET request to /songs endpoint
+   * @param {Hapi.Request} request
+   * @return {Hapi.ResponseToolkit}
+   */
   async getSongsHandler(request) {
     const {title, performer} = request.query;
 
@@ -63,10 +67,10 @@ class SongsHandler {
     };
   }
   /**
-   *
-   * @param {*} request
-   * @param {*} h
-   * @returns
+   * For handling GET request to /songs endpoint with songId
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async getSongByIdHandler(request, h) {
     try {
@@ -87,10 +91,10 @@ class SongsHandler {
   }
 
   /**
-   *
-   * @param {*} request
-   * @param {*} h
-   * @returns
+   * For handling PUT request to /songs endpoint with songId
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async putSongByIdHandler(request, h) {
     try {
@@ -111,10 +115,10 @@ class SongsHandler {
   }
 
   /**
-   *
-   * @param {*} request
-   * @param {*} h
-   * @returns
+   * For handling DELETE request to /songs endpoint with songId
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
    */
   async deleteSongByIdHandler(request, h) {
     try {

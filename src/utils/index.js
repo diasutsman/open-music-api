@@ -28,12 +28,6 @@ const serverErrorResponse = (error, h) => {
   return response;
 };
 
-/**
- * Client Error Response
- * @param {Error} error
- * @param {} h
- * @returns
- */
 const clientErrorResponse = (error, h) => {
   const response = h.response({
     status: 'fail',
