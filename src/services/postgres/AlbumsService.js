@@ -41,8 +41,6 @@ class AlbumsService {
 
     async editAlbumById(id, { name, year }) {
 
-        console.log(name, year)
-
         const query = {
             text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3 RETURNING id',
             values: [name, year, id]

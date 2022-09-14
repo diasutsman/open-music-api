@@ -1,4 +1,5 @@
 const mapSongsDBtoModel = ({
+    id,
     title,
     year,
     genre,
@@ -6,6 +7,7 @@ const mapSongsDBtoModel = ({
     duration = null,
     album_id: albumId = null
 }) => ({
+    id,
     title,
     year,
     genre,
