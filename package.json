@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/server.js",
   "scripts": {
-    "start-dev": "nodemon ./src/server.js",
+    "start-dev": "clear && nodemon ./src/server.js",
     "lint": "eslint ./src",
     "fix-lint": "eslint --fix ./src",
     "migrate": "node-pg-migrate"

@@ -49,8 +49,6 @@ class AlbumsService {
             return result.rows
         })()
 
-        console.log(album)
-
         return album
     }
 
