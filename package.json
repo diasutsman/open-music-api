@@ -1,10 +1,10 @@
 {
-  "name": "open-music-api-v1",
+  "name": "open-music-api",
   "version": "1.0.0",
   "description": "",
   "main": "./src/server.js",
   "scripts": {
-    "start-dev": "clear && nodemon ./src/server.js",
+    "start-dev": "nodemon ./src/server.js",
     "lint": "eslint ./src",
     "fix-lint": "eslint --fix ./src",
     "migrate": "node-pg-migrate"
@@ -15,6 +15,8 @@
   "type": "commonjs",
   "devDependencies": {
     "eslint": "^8.23.1",
+    "eslint-config-google": "^0.14.0",
+    "jsdoc": "^3.6.11",
     "nodemon": "^2.0.19"
   },
   "dependencies": {
