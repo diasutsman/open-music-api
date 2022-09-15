@@ -1,6 +1,3 @@
-const ClientError = require('../../exceptions/ClientError');
-const {serverErrorResponse, clientErrorResponse} = require('../../utils');
-
 /**
  * SongsHandler for handling request to /songs endpoint
  */
@@ -27,28 +24,22 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async postSongHandler(request, h) {
-    try {
-      this.validator.validateSongsPayload(request.payload);
+    this.validator.validateSongsPayload(request.payload);
 
-      const {title, year, performer,
-        genre, duration, albumId} = request.payload;
-      const songId = await this.service.addSong(
-          {title, year, performer, genre, duration, albumId});
+    const {title, year, performer,
+      genre, duration, albumId} = request.payload;
+    const songId = await this.service.addSong(
+        {title, year, performer, genre, duration, albumId});
 
-      const response = h.response({
-        status: 'success',
-        data: {
-          songId,
-        },
-      });
+    const response = h.response({
+      status: 'success',
+      data: {
+        songId,
+      },
+    });
 
-      response.code(201);
-      return response;
-    } catch (error) {
-      return error instanceof ClientError ?
-        clientErrorResponse(error, h) :
-        serverErrorResponse(error, h);
-    }
+    response.code(201);
+    return response;
   }
   /**
    * For handling GET request to /songs endpoint
@@ -73,21 +64,15 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async getSongByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
-      const song = await this.service.getSongById(id);
+    const {id} = request.params;
+    const song = await this.service.getSongById(id);
 
-      return {
-        status: 'success',
-        data: {
-          song,
-        },
-      };
-    } catch (error) {
-      return error instanceof ClientError ?
-        clientErrorResponse(error, h) :
-        serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      data: {
+        song,
+      },
+    };
   }
 
   /**
@@ -97,21 +82,15 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async putSongByIdHandler(request, h) {
-    try {
-      this.validator.validateSongsPayload(request.payload);
+    this.validator.validateSongsPayload(request.payload);
 
-      const {id} = request.params;
-      await this.service.editSongById(id, request.payload);
+    const {id} = request.params;
+    await this.service.editSongById(id, request.payload);
 
-      return {
-        status: 'success',
-        message: 'Lagu berhasil diperbarui',
-      };
-    } catch (error) {
-      return error instanceof ClientError ?
-        clientErrorResponse(error, h) :
-        serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      message: 'Lagu berhasil diperbarui',
+    };
   }
 
   /**
@@ -121,19 +100,13 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async deleteSongByIdHandler(request, h) {
-    try {
-      const {id} = request.params;
-      await this.service.deleteSongById(id);
+    const {id} = request.params;
+    await this.service.deleteSongById(id);
 
-      return {
-        status: 'success',
-        message: 'Lagu berhasil dihapus',
-      };
-    } catch (error) {
-      return error instanceof ClientError ?
-        clientErrorResponse(error, h) :
-        serverErrorResponse(error, h);
-    }
+    return {
+      status: 'success',
+      message: 'Lagu berhasil dihapus',
+    };
   }
 }
 

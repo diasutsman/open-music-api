@@ -10,6 +10,7 @@ const SongsService = require('./services/postgres/SongsService');
 // Validators
 const AlbumsValidator = require('./validator/albums/index');
 const SongsValidator = require('./validator/songs/index');
+const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   const server = Hapi.server({
@@ -43,6 +44,32 @@ const init = async () => {
         },
       ],
   );
+
+  // Handling error before response
+  server.ext('onPreResponse', (request, h) => {
+    // Get response from request
+    const {response} = request;
+
+    // Check if response is instance of ClientError
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.code);
+      return newResponse;
+    } else if (response instanceof Error) {
+      // Check if response is instance of generic Error
+      const newResponse = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      newResponse.code(500);
+      return newResponse;
+    }
+
+    return response.continue || response;
+  });
 
   await server.start();
   console.log('Server running on %s', server.info.uri);
