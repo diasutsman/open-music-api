@@ -1,16 +1,22 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+
+const ClientError = require('./exceptions/ClientError');
+
+// Albums
+const albums = require('./api/albums/index');
+const AlbumsValidator = require('./validator/albums/index');
 const AlbumsService = require('./services/postgres/AlbumsService');
 
-// Plugins
-const albums = require('./api/albums/index');
+// Songs
 const songs = require('./api/songs/index');
 const SongsService = require('./services/postgres/SongsService');
-
-// Validators
-const AlbumsValidator = require('./validator/albums/index');
 const SongsValidator = require('./validator/songs/index');
-const ClientError = require('./exceptions/ClientError');
+
+// Users
+const users = require('./api/users/index')
+const UsersService = require('./services/postgres/UsersService')
+const UsersValidator = require('./validator/users/index')
 
 const init = async () => {
   const server = Hapi.server({
@@ -25,31 +31,39 @@ const init = async () => {
 
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
+  const usersService = new UsersService()
 
   await server.register(
-      [
-        {
-          plugin: albums,
-          options: {
-            service: albumsService,
-            validator: AlbumsValidator,
-          },
+    [
+      {
+        plugin: albums,
+        options: {
+          service: albumsService,
+          validator: AlbumsValidator,
         },
-        {
-          plugin: songs,
-          options: {
-            service: songsService,
-            validator: SongsValidator,
-          },
+      },
+      {
+        plugin: songs,
+        options: {
+          service: songsService,
+          validator: SongsValidator,
         },
-      ],
+      },
+      {
+        plugin: users,
+        options: {
+          service: usersService,
+          validator: UsersValidator,
+        },
+      },
+    ],
   );
 
   // Handling error before response
   server.ext('onPreResponse', (request, h) => {
     // Get response from request
-    const {response} = request;
-
+    const { response } = request;
+    
     // Check if response is instance of ClientError
     if (response instanceof ClientError) {
       const newResponse = h.response({
