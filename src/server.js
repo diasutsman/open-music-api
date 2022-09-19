@@ -18,6 +18,12 @@ const users = require('./api/users/index')
 const UsersService = require('./services/postgres/UsersService')
 const UsersValidator = require('./validator/users/index')
 
+// Authentications
+const authentications = require('./api/authentications/index');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications/index');
+const TokenManager = require('./tokenize/TokenManager');
+
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT,
@@ -32,6 +38,7 @@ const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService()
+  const authenticationsService = new AuthenticationsService();
 
   await server.register(
     [
@@ -56,6 +63,15 @@ const init = async () => {
           validator: UsersValidator,
         },
       },
+      {
+        plugin: authentications,
+        options: {
+          authenticationsService,
+          usersService,
+          tokenManager: TokenManager,
+          validator: AuthenticationsValidator,
+        },
+      },
     ],
   );
 
@@ -63,7 +79,6 @@ const init = async () => {
   server.ext('onPreResponse', (request, h) => {
     // Get response from request
     const { response } = request;
-    
     // Check if response is instance of ClientError
     if (response instanceof ClientError) {
       const newResponse = h.response({
@@ -73,6 +88,7 @@ const init = async () => {
       newResponse.code(response.code);
       return newResponse;
     } else if (response instanceof Error) {
+      console.error(response)
       // Check if response is instance of generic Error
       const newResponse = h.response({
         status: 'error',
