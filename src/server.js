@@ -1,5 +1,6 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt')
 
 const ClientError = require('./exceptions/ClientError');
 
@@ -24,7 +25,21 @@ const AuthenticationsService = require('./services/postgres/AuthenticationsServi
 const AuthenticationsValidator = require('./validator/authentications/index');
 const TokenManager = require('./tokenize/TokenManager');
 
+// Playlists
+const playlists = require('./api/playlists/index');
+const PlaylistsService = require('./services/postgres/PlaylistsService');
+const PlaylistsValidator = require('./validator/playlists/index');
+const PlaylistSongsService = require('./services/postgres/PlaylistsSongsService');
+
 const init = async () => {
+  const albumsService = new AlbumsService();
+  const songsService = new SongsService();
+  const usersService = new UsersService()
+  const authenticationsService = new AuthenticationsService();
+
+  const playlistsSongsService = new PlaylistSongsService(songsService);
+  const playlistsService = new PlaylistsService(playlistsSongsService);
+
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -35,10 +50,29 @@ const init = async () => {
     },
   });
 
-  const albumsService = new AlbumsService();
-  const songsService = new SongsService();
-  const usersService = new UsersService()
-  const authenticationsService = new AuthenticationsService();
+  // register external plugin
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  // Define the authentication strategy jwt
+  server.auth.strategy('openmusicapi_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credential: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  });
 
   await server.register(
     [
@@ -72,6 +106,13 @@ const init = async () => {
           validator: AuthenticationsValidator,
         },
       },
+      {
+        plugin: playlists,
+        options: {
+          service: playlistsService,
+          validator: PlaylistsValidator,
+        },
+      },
     ],
   );
 
@@ -87,15 +128,10 @@ const init = async () => {
       });
       newResponse.code(response.code);
       return newResponse;
-    } else if (response instanceof Error) {
-      console.error(response)
-      // Check if response is instance of generic Error
-      const newResponse = h.response({
-        status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
-      });
-      newResponse.code(500);
-      return newResponse;
+    }
+
+    if (response instanceof Error) {
+      console.log(response.stack)
     }
 
     return response.continue || response;
