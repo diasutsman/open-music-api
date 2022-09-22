@@ -15,7 +15,7 @@
  * @typedef { import('../../validator/playlists/index') } PlaylistsValidator
  */
 
-const {autoBind} = require('../../utils');
+const autoBind = require('auto-bind');
 
 /**
  * Playlists handler that will be used to handle playlists routes

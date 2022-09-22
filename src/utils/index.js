@@ -16,8 +16,4 @@ const mapSongsDBtoModel = ({
   albumId,
 });
 
-const autoBind = (self) =>
-  Object.getOwnPropertyNames(Object.getPrototypeOf(self))
-      .forEach((prop) => self[prop] = self[prop].bind(self));
-
-module.exports = {mapSongsDBtoModel, autoBind};
+module.exports = {mapSongsDBtoModel};

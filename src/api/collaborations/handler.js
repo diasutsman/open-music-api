@@ -17,7 +17,7 @@
  * } CollaborationsValidator
  */
 
-const {autoBind} = require('../../utils');
+const autoBind = require('auto-bind');
 
 /**
  * Collaboration handler that will be used to handle collaboration

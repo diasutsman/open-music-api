@@ -15,7 +15,7 @@
  * } AuthenticationsValidator
  */
 
-const {autoBind} = require('../../utils');
+const autoBind = require('auto-bind');
 
 
 /**

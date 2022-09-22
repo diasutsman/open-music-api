@@ -10,7 +10,7 @@
  * @typedef { import('../../validator/users/index') } UsersValidator
  */
 
-const {autoBind} = require('../../utils');
+const autoBind = require('auto-bind');
 
 /**
  * Handler for users route

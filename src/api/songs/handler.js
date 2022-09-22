@@ -1,4 +1,4 @@
-const {autoBind} = require('../../utils');
+const autoBind = require('auto-bind');
 
 /**
  * SongsHandler for handling request to /songs endpoint
