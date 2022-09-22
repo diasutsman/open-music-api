@@ -1,92 +1,138 @@
+/**
+ * Import necessary modules
+ * @typedef { import('@hapi/hapi') } Hapi
+ * @typedef { import('@hapi/jwt') } Jwt
+ * @typedef { import('@hapi/hapi').Request } Hapi.Request
+ * @typedef { import('@hapi/hapi').ResponseToolkit } Hapi.ResponseToolkit
+ * @typedef { import('@hapi/hapi').ResponseObject } Hapi.ResponseObject
+ *
+ * @typedef {
+ *    import('../../services/postgres/AuthenticationsService')
+ * } AuthenticationsService
+ * @typedef { import('../../services/postgres/UsersService') } UsersService
+ * @typedef {
+ *    import('../../validator/authentications/index')
+ * } AuthenticationsValidator
+ */
+
+
+/**
+ * Authentication handler that will be used to authenticate user
+ */
 class AuthenticationsHandler {
+  /**
+   * Handler for authentications constructor
+   *
+   * @param {AuthenticationsService} authService
+   * @param {UsersService} usersService
+   * @param {TokenManager} tokenManager
+   * @param {AuthenticationsValidator} validator
+   */
+  constructor(authService, usersService, tokenManager, validator) {
+    this._authService = authService;
+    this._usersService = usersService;
+    this._tokenManager = tokenManager;
+    this._validator = validator;
 
-    constructor(authenticationsService, usersService, tokenManager, validator) {
-        this.authenticationsService = authenticationsService;
-        this.usersService = usersService;
-        this.tokenManager = tokenManager;
-        this.validator = validator;
+    this.deleteAuthHandler = this.deleteAuthHandler.bind(this);
+    this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
+    this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
+  }
 
-        this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
-        this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
-        this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
-    }
+  /**
+   * Handle post authentication to generate access token
+   *
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseObject}
+   */
+  async postAuthenticationHandler(request, h) {
+    // Validate payload
+    this._validator.validatePostAuthenticationPayload(request.payload);
 
-    async postAuthenticationHandler(request, h) {
-        // Validate payload
-        this.validator.validatePostAuthenticationPayload(request.payload);
+    const {username, password} = request.payload;
 
-        const { username, password } = request.payload;
+    // Verify credential
+    const id =
+      await this._usersService.verifyUserCredential(username, password);
 
-        // Verify credential
-        const id = await this.usersService.verifyUserCredential(username, password);
+    // Generate access token and refresh token
+    const accessToken = this._tokenManager.generateAccessToken({id});
+    const refreshToken = this._tokenManager.generateRefreshToken({id});
 
-        // Generate access token and refresh token
-        const accessToken = this.tokenManager.generateAccessToken({ id });
-        const refreshToken = this.tokenManager.generateRefreshToken({ id });
+    // Add refresh token to database
+    await this._authService.addRefreshToken(refreshToken);
 
-        // Add refresh token to database
-        await this.authenticationsService.addRefreshToken(refreshToken);
+    // Return response with access token and refresh token
+    const response = h.response({
+      status: 'success',
+      message: 'Authentication berhasil ditambahkan.',
+      data: {
+        accessToken,
+        refreshToken,
+      },
+    });
 
-        // Return response with access token and refresh token
-        const response = h.response({
-            status: 'success',
-            message: 'Authentication berhasil ditambahkan.',
-            data: {
-                accessToken,
-                refreshToken,
-            },
-        });
+    response.code(201);
 
-        response.code(201);
+    return response;
+  }
 
-        return response;
+  /**
+   * Handle put authentication to refresh access token
+   *
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseObject}
+   */
+  async putAuthenticationHandler(request, h) {
+    // Validate payload
+    this._validator.validatePutAuthenticationPayload(request.payload);
 
-    }
+    // Retrieve the access token from payload
+    const {refreshToken} = request.payload;
 
-    async putAuthenticationHandler(request, h) {
-        // Validate payload
-        this.validator.validatePutAuthenticationPayload(request.payload);
+    // Verify refreshToken both in terms of database and token signature
+    await this._authService.verifyRefreshToken(refreshToken);
+    const {id} = this._tokenManager.verifyRefreshToken(refreshToken);
 
-        // Retrieve the access token from payload
-        const { refreshToken } = request.payload;
+    // Regenerate new accessToken with the id payload from refreshToken
+    const accessToken = this._tokenManager.generateAccessToken({id});
 
-        // Verify refreshToken both in terms of database and token signature
-        await this.authenticationsService.verifyRefreshToken(refreshToken);
-        const { id } = this.tokenManager.verifyRefreshToken(refreshToken);
+    // Return the response with accessToken
+    return {
+      status: 'success',
+      message: 'Access Token berhasil diperbarui',
+      data: {
+        accessToken,
+      },
+    };
+  }
 
-        // Regenerate new accessToken with the id payload from refreshToken
-        const accessToken = this.tokenManager.generateAccessToken({ id });
+  /**
+   * Handle delete authentication to delete refresh token
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseObject}
+   */
+  async deleteAuthHandler(request, h) {
+    // Validate payload
+    this._validator.validateDeleteAuthenticationPayload(request.payload);
 
-        // Return the response with accessToken
-        return {
-            status: 'success',
-            message: 'Access Token berhasil diperbarui',
-            data: {
-                accessToken,
-            },
-        };
+    // Retrieve the access token from payload
+    const {refreshToken} = request.payload;
 
-    }
+    // Check if the refresh token is exist in database
+    await this._authService.verifyRefreshToken(refreshToken);
 
-    async deleteAuthenticationHandler(request, h) {
-        // Validate payload
-        this.validator.validateDeleteAuthenticationPayload(request.payload);
+    // Delete the refresh token from database
+    await this._authService.deleteRefreshToken(refreshToken);
 
-        // Retrieve the access token from payload
-        const { refreshToken } = request.payload;
-
-        // Check if the refresh token is exist in database
-        await this.authenticationsService.verifyRefreshToken(refreshToken);
-
-        // Delete the refresh token from database
-        await this.authenticationsService.deleteRefreshToken(refreshToken);
-
-        return {
-            status: 'success',
-            message: 'Refresh token berhasil dihapus',
-        };
-
-    }
+    return {
+      status: 'success',
+      message: 'Refresh token berhasil dihapus',
+    };
+  }
 }
 
 module.exports = AuthenticationsHandler;

@@ -5,8 +5,8 @@
   "main": "./src/server.js",
   "scripts": {
     "start-dev": "nodemon ./src/server.js",
-    "lint": "eslint ./src",
-    "fix-lint": "eslint --fix ./src",
+    "lint": "eslint ./src ./migrations",
+    "fix-lint": "eslint --fix ./src ./migrations",
     "migrate": "node-pg-migrate"
   },
   "keywords": [],

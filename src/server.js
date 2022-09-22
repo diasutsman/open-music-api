@@ -1,6 +1,6 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const Jwt = require('@hapi/jwt')
+const Jwt = require('@hapi/jwt');
 
 const ClientError = require('./exceptions/ClientError');
 
@@ -15,37 +15,42 @@ const SongsService = require('./services/postgres/SongsService');
 const SongsValidator = require('./validator/songs/index');
 
 // Users
-const users = require('./api/users/index')
-const UsersService = require('./services/postgres/UsersService')
-const UsersValidator = require('./validator/users/index')
+const users = require('./api/users/index');
+const UsersService = require('./services/postgres/UsersService');
+const UsersValidator = require('./validator/users/index');
 
 // Authentications
 const authentications = require('./api/authentications/index');
-const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsService =
+  require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications/index');
 const TokenManager = require('./tokenize/TokenManager');
 
 // Playlists
 const playlists = require('./api/playlists/index');
 const PlaylistsService = require('./services/postgres/PlaylistsService');
-const PlaylistActivitiesService = require('./services/postgres/PlaylistsActivitiesService');
+const PlaylistActivitiesService =
+  require('./services/postgres/PlaylistsActivitiesService');
 const PlaylistsValidator = require('./validator/playlists/index');
-const PlaylistSongsService = require('./services/postgres/PlaylistsSongsService');
+const PlaylistSongsService =
+  require('./services/postgres/PlaylistsSongsService');
 
 // Collaborations
 const collaborations = require('./api/collaborations/index');
-const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsService =
+  require('./services/postgres/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations/index');
 
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
-  const usersService = new UsersService()
+  const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
 
   const playlistsSongsService = new PlaylistSongsService(songsService);
   const collaborationsService = new CollaborationsService(usersService);
-  const playlistsService = new PlaylistsService(playlistsSongsService, collaborationsService);
+  const playlistsService =
+    new PlaylistsService(playlistsSongsService, collaborationsService);
   const playlistActivitiesService = new PlaylistActivitiesService();
 
   const server = Hapi.server({
@@ -83,75 +88,90 @@ const init = async () => {
   });
 
   await server.register(
-    [
-      {
-        plugin: albums,
-        options: {
-          service: albumsService,
-          validator: AlbumsValidator,
+      [
+        {
+          plugin: albums,
+          options: {
+            service: albumsService,
+            validator: AlbumsValidator,
+          },
         },
-      },
-      {
-        plugin: songs,
-        options: {
-          service: songsService,
-          validator: SongsValidator,
+        {
+          plugin: songs,
+          options: {
+            service: songsService,
+            validator: SongsValidator,
+          },
         },
-      },
-      {
-        plugin: users,
-        options: {
-          service: usersService,
-          validator: UsersValidator,
+        {
+          plugin: users,
+          options: {
+            service: usersService,
+            validator: UsersValidator,
+          },
         },
-      },
-      {
-        plugin: authentications,
-        options: {
-          authenticationsService,
-          usersService,
-          tokenManager: TokenManager,
-          validator: AuthenticationsValidator,
+        {
+          plugin: authentications,
+          options: {
+            authenticationsService,
+            usersService,
+            tokenManager: TokenManager,
+            validator: AuthenticationsValidator,
+          },
         },
-      },
-      {
-        plugin: playlists,
-        options: {
-          playlistsService,
-          playlistActivitiesService,
-          validator: PlaylistsValidator,
+        {
+          plugin: playlists,
+          options: {
+            playlistsService,
+            playlistActivitiesService,
+            validator: PlaylistsValidator,
+          },
         },
-      },
-      {
-        plugin: collaborations,
-        options: {
-          collaborationsService,
-          playlistsService,
-          validator: CollaborationsValidator,
+        {
+          plugin: collaborations,
+          options: {
+            collaborationsService,
+            playlistsService,
+            validator: CollaborationsValidator,
+          },
         },
-      },
-    ],
+      ],
   );
 
   // Handling error before response
   server.ext('onPreResponse', (request, h) => {
     // Get response from request
-    const { response } = request;
-    // Check if response is instance of ClientError
-    if (response instanceof ClientError) {
+    const {response} = request;
+
+    if (response instanceof Error) {
+      // Check if response is instance of ClientError
+      if (response instanceof ClientError) {
+        const newResponse = h.response({
+          status: 'fail',
+          message: response.message,
+        });
+        newResponse.code(response.statusCode);
+        return newResponse;
+      }
+
+      // mempertahankan penanganan client error oleh hapi secara native,
+      // seperti 404, etc.
+      if (!response.isServer) {
+        return h.continue;
+      }
+
+      // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
-        status: 'fail',
-        message: response.message,
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
-      newResponse.code(response.code);
+      newResponse.code(500);
       return newResponse;
     }
 
-    if (response instanceof Error) {
-      console.log(response);
-    }
-
-    return response.continue || response;
+    // jika bukan error,
+    // lanjutkan dengan response sebelumnya (tanpa terintervensi)
+    return h.continue;
   });
 
   await server.start();

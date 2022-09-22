@@ -24,7 +24,7 @@ class SongsService {
    *   duration : string?,
    *   albumId : string?,
    * }} postReqBody
-   * @return {string}
+   * @return {Promise<string>}
    */
   async addSong({
     title,
@@ -53,7 +53,7 @@ class SongsService {
   /**
    * Get all songs from database and filtered it by query
    * @param {{title: string, performer: string}} queryObj
-   * @return {any[]}
+   * @return {Promise<any[]>}
    */
   async getSongs({title = '', performer = ''}) {
     const query = {
@@ -70,7 +70,7 @@ class SongsService {
   /**
    * Get song by id
    * @param {string} id
-   * @return {any}
+   * @return {Promise<any>}
    */
   async getSongById(id) {
     const query = {

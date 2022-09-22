@@ -17,7 +17,7 @@ class AlbumsService {
   /**
    * Add new album to database and return its id
    * @param {{name: string, year: number}} postReqBody
-   * @return {string}
+   * @return {Promise<string>}
    */
   async addAlbum({name, year}) {
     const id = `album-${nanoid(16)}`;
@@ -38,7 +38,7 @@ class AlbumsService {
   /**
    * Get album by id
    * @param {string} id
-   * @return {any}
+   * @return {Promise<any>}
    */
   async getAlbumById(id) {
     const query = {

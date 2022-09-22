@@ -4,11 +4,11 @@
 class ClientError extends Error {
   /**
    * @param {string} message
-   * @param {number} code
+   * @param {number} statusCode
    */
-  constructor(message, code = 400) {
+  constructor(message, statusCode = 400) {
     super(message);
-    this.code = code;
+    this.statusCode = statusCode;
     this.name = this.constructor.name;
   }
 }
