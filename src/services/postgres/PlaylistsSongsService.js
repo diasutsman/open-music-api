@@ -5,7 +5,6 @@
 const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
-const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
  * Playlists service.
@@ -28,13 +27,7 @@ class PlaylistsSongsService {
   async addPlaylistSong(playlistId, songId) {
     const id = `playlist_song-${nanoid(16)}`;
 
-    const song = await this.songsService.getSongById(songId);
-
-    if (!song) {
-      throw new NotFoundError(
-          'Lagu gagal ditambahkan ke playlist. Id lagu tidak ditemukan',
-      );
-    }
+    await this.songsService.getSongById(songId);
 
     const query = {
       text: 'INSERT INTO playlists_songs VALUES($1, $2, $3) RETURNING id',

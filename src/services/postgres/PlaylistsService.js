@@ -156,8 +156,9 @@ class PlaylistsService {
 
     const result = await this.pool.query(query);
 
+    const [playlist] = result.rows;
 
-    result.rows[0].songs = (await this.pool.query({
+    playlist.songs = (await this.pool.query({
       text: `SELECT songs.id, songs.title, songs.performer FROM songs
             LEFT JOIN playlists_songs ON playlists_songs.song_id = songs.id
             WHERE playlists_songs.playlist_id = $1
@@ -165,7 +166,7 @@ class PlaylistsService {
       values: [id],
     })).rows;
 
-    return result.rows[0];
+    return playlist;
   }
 
   /**
