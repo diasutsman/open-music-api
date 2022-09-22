@@ -1,22 +1,3 @@
-/**
- * Import necessary modules
- * @typedef { import('@hapi/hapi') } Hapi
- * @typedef { import('@hapi/jwt') } Jwt
- * @typedef { import('@hapi/hapi').Request } Hapi.Request
- * @typedef { import('@hapi/hapi').ResponseToolkit } Hapi.ResponseToolkit
- * @typedef { import('@hapi/hapi').ResponseObject } Hapi.ResponseObject
- *
- * @typedef {
- *    import('../../services/postgres/CollaborationsService')
- * } CollaborationsService
- * @typedef {
- *    import('../../services/postgres/PlaylistsService')
- * } PlaylistsService
- * @typedef {
- *    import('../../validator/collaborations/index')
- * } CollaborationsValidator
- */
-
 const autoBind = require('auto-bind');
 
 /**
@@ -25,7 +6,7 @@ const autoBind = require('auto-bind');
 class CollaborationsHandler {
   /**
    * Collaboration handler constructor
-   * @param {Col} collabsService
+   * @param {CollaborationsService} collabsService
    * @param {PlaylistsService} playlistService
    * @param {*} validator
    */

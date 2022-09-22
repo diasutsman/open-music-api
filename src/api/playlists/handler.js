@@ -1,20 +1,3 @@
-/**
- * Import necessary modules
- * @typedef { import('@hapi/hapi') } Hapi
- * @typedef { import('@hapi/jwt') } Jwt
- * @typedef { import('@hapi/hapi').Request } Hapi.Request
- * @typedef { import('@hapi/hapi').ResponseToolkit } Hapi.ResponseToolkit
- * @typedef { import('@hapi/hapi').ResponseObject } Hapi.ResponseObject
- *
- * @typedef {
- *    import('../../services/postgres/PlaylistsService')
- * } PlaylistsService
- * @typedef {
- *    import('../../services/postgres/PlaylistsActivitiesService')
- * } PlaylistsActivitiesService
- * @typedef { import('../../validator/playlists/index') } PlaylistsValidator
- */
-
 const autoBind = require('auto-bind');
 
 /**

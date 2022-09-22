@@ -1,22 +1,4 @@
-/**
- * Import necessary modules
- * @typedef { import('@hapi/hapi') } Hapi
- * @typedef { import('@hapi/jwt') } Jwt
- * @typedef { import('@hapi/hapi').Request } Hapi.Request
- * @typedef { import('@hapi/hapi').ResponseToolkit } Hapi.ResponseToolkit
- * @typedef { import('@hapi/hapi').ResponseObject } Hapi.ResponseObject
- *
- * @typedef {
- *    import('../../services/postgres/AuthenticationsService')
- * } AuthenticationsService
- * @typedef { import('../../services/postgres/UsersService') } UsersService
- * @typedef {
- *    import('../../validator/authentications/index')
- * } AuthenticationsValidator
- */
-
 const autoBind = require('auto-bind');
-
 
 /**
  * Authentication handler that will be used to authenticate user

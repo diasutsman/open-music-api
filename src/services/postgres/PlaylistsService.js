@@ -1,12 +1,3 @@
-/**
- * @typedef {
- *  import('../../services/postgres/PlaylistsSongsService')
- * } PlaylistsSongsService
- * @typedef {
- *  import('../../services/postgres/CollaborationsService')
- * } CollaborationsService
- */
-
 const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');

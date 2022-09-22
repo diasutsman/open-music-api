@@ -1,7 +1,3 @@
-/**
- * @typedef {import('./SongsService')} SongsService
- */
-
 const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');

@@ -1,15 +1,3 @@
-/**
- * Import necessary modules
- * @typedef { import('@hapi/hapi') } Hapi
- * @typedef { import('@hapi/jwt') } Jwt
- * @typedef { import('@hapi/hapi').Request } Hapi.Request
- * @typedef { import('@hapi/hapi').ResponseToolkit } Hapi.ResponseToolkit
- * @typedef { import('@hapi/hapi').ResponseObject } Hapi.ResponseObject
- *
- * @typedef { import('../../services/postgres/UsersService') } UsersService
- * @typedef { import('../../validator/users/index') } UsersValidator
- */
-
 const autoBind = require('auto-bind');
 
 /**
