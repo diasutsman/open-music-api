@@ -15,6 +15,8 @@
  * @typedef { import('../../validator/playlists/index') } PlaylistsValidator
  */
 
+const {autoBind} = require('../../utils');
+
 /**
  * Playlists handler that will be used to handle playlists routes
  */
@@ -30,16 +32,7 @@ class PlaylistsHandler {
     this.playlistActivitiesService = playlistActivitiesService;
     this.validator = validator;
 
-    this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
-    this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
-    this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
-    this.postSongToPlaylistHandler = this.postSongToPlaylistHandler.bind(this);
-    this.getSongsFromPlaylistHandler =
-      this.getSongsFromPlaylistHandler.bind(this);
-    this.deleteSongFromPlaylistHandler =
-      this.deleteSongFromPlaylistHandler.bind(this);
-    this.getActivitiesFromPlaylistHandler =
-      this.getActivitiesFromPlaylistHandler.bind(this);
+    autoBind(this);
   }
 
   /**

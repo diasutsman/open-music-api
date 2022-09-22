@@ -17,6 +17,8 @@
  * } CollaborationsValidator
  */
 
+const {autoBind} = require('../../utils');
+
 /**
  * Collaboration handler that will be used to handle collaboration
  */
@@ -32,8 +34,7 @@ class CollaborationsHandler {
     this._playlistService = playlistService;
     this._validator = validator;
 
-    this.postCollabHandler = this.postCollabHandler.bind(this);
-    this.deleteCollabHandler = this.deleteCollabHandler.bind(this);
+    autoBind(this);
   }
 
   /**

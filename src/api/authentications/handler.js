@@ -15,6 +15,8 @@
  * } AuthenticationsValidator
  */
 
+const {autoBind} = require('../../utils');
+
 
 /**
  * Authentication handler that will be used to authenticate user
@@ -34,9 +36,7 @@ class AuthenticationsHandler {
     this._tokenManager = tokenManager;
     this._validator = validator;
 
-    this.deleteAuthHandler = this.deleteAuthHandler.bind(this);
-    this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
-    this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
+    autoBind(this);
   }
 
   /**

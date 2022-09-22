@@ -10,6 +10,8 @@
  * @typedef { import('../../validator/users/index') } UsersValidator
  */
 
+const {autoBind} = require('../../utils');
+
 /**
  * Handler for users route
  */
@@ -23,7 +25,7 @@ class UsersHandler {
     this._service = service;
     this._validator = validator;
 
-    this.postUserHandler = this.postUserHandler.bind(this);
+    autoBind(this);
   }
 
   /**

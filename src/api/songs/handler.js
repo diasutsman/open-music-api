@@ -1,3 +1,5 @@
+const {autoBind} = require('../../utils');
+
 /**
  * SongsHandler for handling request to /songs endpoint
  */
@@ -11,11 +13,7 @@ class SongsHandler {
     this.service = service;
     this.validator = validator;
 
-    this.postSongHandler = this.postSongHandler.bind(this);
-    this.getSongsHandler = this.getSongsHandler.bind(this);
-    this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
-    this.putSongByIdHandler = this.putSongByIdHandler.bind(this);
-    this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
+    autoBind(this);
   }
   /**
    * For handling POST request to /songs endpoint

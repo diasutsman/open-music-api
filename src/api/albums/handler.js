@@ -1,3 +1,5 @@
+const {autoBind} = require('../../utils');
+
 /**
  * AlbumsHandler for handling request to /albums endpoint
  */
@@ -11,10 +13,7 @@ class AlbumsHandler {
     this.service = service;
     this.validator = validator;
 
-    this.postAlbumHandler = this.postAlbumHandler.bind(this);
-    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
-    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
-    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+    autoBind(this);
   }
 
   /**
