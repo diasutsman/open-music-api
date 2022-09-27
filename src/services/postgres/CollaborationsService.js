@@ -11,9 +11,10 @@ class CollaborationsService {
    * Collaborations service constructor.
    * @param {UsersService} usersService
    */
-  constructor(usersService) {
+  constructor(usersService, cacheService) {
     this._pool = new Pool();
     this._usersService = usersService;
+    this._cacheService = cacheService;
   }
 
   /**
@@ -38,6 +39,8 @@ class CollaborationsService {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
     }
 
+    await this._cacheService.delete(`playlists:${userId}`);
+
     return result.rows[0].id;
   }
 
@@ -60,6 +63,8 @@ class CollaborationsService {
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal dihapus');
     }
+
+    await this._cacheService.delete(`playlists:${userId}`);
   }
 
   /**

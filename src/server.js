@@ -59,21 +59,21 @@ const CacheService = require('./services/redis/CacheService');
 const config = require('./utils/config');
 
 const init = async () => {
+  const cacheService = new CacheService();
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
 
   const playlistsSongsService = new PlaylistSongsService(songsService);
-  const collaborationsService = new CollaborationsService(usersService);
+  const collaborationsService = new CollaborationsService(usersService, cacheService);
   const playlistsService =
-    new PlaylistsService(playlistsSongsService, collaborationsService);
+    new PlaylistsService(playlistsSongsService, collaborationsService, cacheService);
   const playlistActivitiesService = new PlaylistActivitiesService();
 
   const storageService = new StorageService(
       path.resolve(__dirname, 'api/albums/file/covers'),
   );
-  const cacheService = new CacheService();
   const albumsLikesService = new AlbumsLikesService(cacheService);
 
 
