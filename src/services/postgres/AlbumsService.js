@@ -12,7 +12,7 @@ class AlbumsService {
    * Constructor to create new instance of ALbumsService that initialize pool
    */
   constructor() {
-    this.pool = new Pool();
+    this._pool = new Pool();
   }
 
   /**
@@ -28,7 +28,7 @@ class AlbumsService {
       values: [id, name, year],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rows[0].id) {
       throw new InvariantError('Album gagal ditambahkan');
@@ -47,14 +47,14 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Album tidak ditemukan');
     }
 
     const [album] = result.rows.map(mapAlbumsDBtoModel);
 
-    album.songs = (await this.pool.query({
+    album.songs = (await this._pool.query({
       text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
       values: [id],
     })).rows;
@@ -72,7 +72,7 @@ class AlbumsService {
       values: [name, year, id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
@@ -88,7 +88,7 @@ class AlbumsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus album. Id tidak ditemukan');
     }
@@ -105,7 +105,7 @@ class AlbumsService {
       values: [cover, id],
     };
 
-    await this.pool.query(query);
+    await this._pool.query(query);
   }
 }
 

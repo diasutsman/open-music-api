@@ -10,7 +10,7 @@ class PlaylistsActivitiesService {
    * Playlists activities service constructor.
    */
   constructor() {
-    this.pool = new Pool();
+    this._pool = new Pool();
   }
 
   /**
@@ -30,7 +30,7 @@ class PlaylistsActivitiesService {
       values: [id, playlistId, songId, userId, action, time],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Gagal menambahkan playlist activity');
@@ -52,7 +52,7 @@ class PlaylistsActivitiesService {
       values: [playlistId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Playlist tidak ditemukan');

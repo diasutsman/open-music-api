@@ -10,8 +10,8 @@ class SongsHandler {
      * @param {SongsValidator} validator
      */
   constructor(service, validator) {
-    this.service = service;
-    this.validator = validator;
+    this._service = service;
+    this._validator = validator;
 
     autoBind(this);
   }
@@ -22,9 +22,9 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async postSongHandler(request, h) {
-    this.validator.validateSongsPayload(request.payload);
+    this._validator.validateSongsPayload(request.payload);
 
-    const songId = await this.service.addSong(request.payload);
+    const songId = await this._service.addSong(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -44,7 +44,7 @@ class SongsHandler {
   async getSongsHandler(request) {
     const {title, performer} = request.query;
 
-    const songs = await this.service.getSongs({title, performer});
+    const songs = await this._service.getSongs({title, performer});
     return {
       status: 'success',
       data: {
@@ -60,7 +60,7 @@ class SongsHandler {
    */
   async getSongByIdHandler(request, h) {
     const {id} = request.params;
-    const song = await this.service.getSongById(id);
+    const song = await this._service.getSongById(id);
 
     return {
       status: 'success',
@@ -77,10 +77,10 @@ class SongsHandler {
    * @return {Hapi.ResponseToolkit}
    */
   async putSongByIdHandler(request, h) {
-    this.validator.validateSongsPayload(request.payload);
+    this._validator.validateSongsPayload(request.payload);
 
     const {id} = request.params;
-    await this.service.editSongById(id, request.payload);
+    await this._service.editSongById(id, request.payload);
 
     return {
       status: 'success',
@@ -96,7 +96,7 @@ class SongsHandler {
    */
   async deleteSongByIdHandler(request, h) {
     const {id} = request.params;
-    await this.service.deleteSongById(id);
+    await this._service.deleteSongById(id);
 
     return {
       status: 'success',

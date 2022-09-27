@@ -13,9 +13,9 @@ class PlaylistsService {
    * @param {CollaborationsService} collaborationsService
    */
   constructor(playlistsSongsService, collaborationsService) {
-    this.pool = new Pool();
-    this.playlistsSongsService = playlistsSongsService;
-    this.collaborationsService = collaborationsService;
+    this._pool = new Pool();
+    this._playlistsSongsService = playlistsSongsService;
+    this._collaborationsService = collaborationsService;
   }
 
   /**
@@ -31,7 +31,7 @@ class PlaylistsService {
       values: [id, name, owner],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Playlist gagal ditambahkan');
@@ -54,7 +54,7 @@ class PlaylistsService {
       values: [owner],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
     return result.rows;
   }
 
@@ -68,7 +68,7 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus playlist. Id tidak ditemukan');
@@ -87,7 +87,7 @@ class PlaylistsService {
     };
 
     // Query to database
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     // If playlist not exists then throws NotFoundError
     if (!result.rowCount) {
@@ -116,7 +116,9 @@ class PlaylistsService {
       }
 
       try {
-        await this.collaborationsService.verifyCollaborator(playlistId, userId);
+        await this._collaborationsService.verifyCollaborator(
+            playlistId, userId,
+        );
       } catch {
         throw error;
       }
@@ -129,7 +131,7 @@ class PlaylistsService {
    * @param {String} songId
    */
   async addSongToPlaylistById(id, songId) {
-    await this.playlistsSongsService.addPlaylistSong(id, songId);
+    await this._playlistsSongsService.addPlaylistSong(id, songId);
   }
 
   /**
@@ -145,11 +147,11 @@ class PlaylistsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     const [playlist] = result.rows;
 
-    playlist.songs = (await this.pool.query({
+    playlist.songs = (await this._pool.query({
       text: `SELECT songs.id, songs.title, songs.performer FROM songs
             LEFT JOIN playlists_songs ON playlists_songs.song_id = songs.id
             WHERE playlists_songs.playlist_id = $1
@@ -166,7 +168,7 @@ class PlaylistsService {
    * @param {String} songId
    */
   async deletePlaylistSongsById(id, songId) {
-    await this.playlistsSongsService.deletePlaylistSong(id, songId);
+    await this._playlistsSongsService.deletePlaylistSong(id, songId);
   }
 }
 

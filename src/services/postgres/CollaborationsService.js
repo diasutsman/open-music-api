@@ -12,8 +12,8 @@ class CollaborationsService {
    * @param {UsersService} usersService
    */
   constructor(usersService) {
-    this.pool = new Pool();
-    this.usersService = usersService;
+    this._pool = new Pool();
+    this._usersService = usersService;
   }
 
   /**
@@ -25,14 +25,14 @@ class CollaborationsService {
   async addCollaboration(playlistId, userId) {
     const id = `collab-${nanoid(16)}`;
 
-    await this.usersService.verifyUserExist(userId);
+    await this._usersService.verifyUserExist(userId);
 
     const query = {
       text: 'INSERT INTO collaborations VALUES($1, $2, $3) RETURNING id',
       values: [id, playlistId, userId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
@@ -47,7 +47,7 @@ class CollaborationsService {
    * @param {String} userId
    */
   async deleteCollaboration(playlistId, userId) {
-    await this.usersService.verifyUserExist(userId);
+    await this._usersService.verifyUserExist(userId);
 
     const query = {
       text: `DELETE FROM collaborations 
@@ -55,7 +55,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Kolaborasi gagal dihapus');
@@ -74,7 +74,7 @@ class CollaborationsService {
       values: [playlistId, userId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');

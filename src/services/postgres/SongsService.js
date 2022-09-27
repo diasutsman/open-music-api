@@ -10,7 +10,7 @@ class SongsService {
    * Constructor to create new instance of SongsService that initialize pool
    */
   constructor() {
-    this.pool = new Pool();
+    this._pool = new Pool();
   }
 
   /**
@@ -40,7 +40,7 @@ class SongsService {
       values: [id, title, year, genre, performer, duration, albumId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rows[0].id) {
       throw new InvariantError('Lagu gagal ditambahkan');
@@ -61,7 +61,7 @@ class SongsService {
       values: [`%${title}%`, `%${performer}%`],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     return result.rows;
   }
@@ -78,7 +78,7 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan');
@@ -116,7 +116,7 @@ class SongsService {
       values: [title, year, genre, performer, duration, albumId, id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
@@ -133,7 +133,7 @@ class SongsService {
       values: [id],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus lagu. Id tidak ditemukan');

@@ -11,8 +11,8 @@ class PlaylistsSongsService {
    * @param {SongsService} songsService
    */
   constructor(songsService) {
-    this.pool = new Pool();
-    this.songsService = songsService;
+    this._pool = new Pool();
+    this._songsService = songsService;
   }
 
   /**
@@ -23,14 +23,14 @@ class PlaylistsSongsService {
   async addPlaylistSong(playlistId, songId) {
     const id = `playlist_song-${nanoid(16)}`;
 
-    await this.songsService.getSongById(songId);
+    await this._songsService.getSongById(songId);
 
     const query = {
       text: 'INSERT INTO playlists_songs VALUES($1, $2, $3) RETURNING id',
       values: [id, playlistId, songId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Gagal menambahkan lagu ke playlist');
@@ -49,7 +49,7 @@ class PlaylistsSongsService {
       values: [playlistId, songId],
     };
 
-    const result = await this.pool.query(query);
+    const result = await this._pool.query(query);
 
     if (!result.rowCount) {
       throw new InvariantError('Gagal menghapus lagu dari playlist');
