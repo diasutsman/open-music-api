@@ -55,7 +55,8 @@ const StorageService = require('./services/storage/StorageService')
 const AlbumsLikesService = require('./services/postgres/AlbumsLikesService');
 
 // Cache
-const CacheService = require('./services/redis/CacheService')
+const CacheService = require('./services/redis/CacheService');
+const config = require('./utils/config');
 
 const init = async () => {
   const albumsService = new AlbumsService();
@@ -75,8 +76,8 @@ const init = async () => {
 
 
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     routes: {
       cors: {
         origin: ['*'],
