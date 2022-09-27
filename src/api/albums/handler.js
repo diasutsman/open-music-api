@@ -10,9 +10,10 @@ class AlbumsHandler {
      * @param {StorageService} storageService
      * @param {AlbumsValidator} validator
      */
-  constructor(albumsService, storageService, validator) {
+  constructor(albumsService, storageService, albumsLikesService, validator) {
     this._albumsService = albumsService;
     this._storageService = storageService
+    this._albumsLikesService = albumsLikesService;
     this._validator = validator;
 
     autoBind(this);
@@ -114,6 +115,40 @@ class AlbumsHandler {
 
     response.code(201)
     return response
+  }
+
+  async postAlbumLikesByIdHandler(request, h) {
+    const { id } = request.params
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._albumsService.getAlbumById(id) // will throw error if not exists
+    await this._albumsLikesService.toggleLikes(credentialId, id)
+
+    const response = h.response({
+      status: "success",
+      message: "Like berhasil ditambahkan"
+    })
+
+    response.code(201)
+
+    return response
+  }
+
+  async getAlbumLikesByIdHandler(request, h) {
+    const { id } = request.params
+    const { likes, cache } = await this._albumsLikesService.getAlbumLikes(id)
+
+    const response = h.response({
+      status: "success",
+      data: {
+        likes
+      }
+    })
+    
+    cache && response.header('X-Data-Source', cache)
+
+    return response
+
   }
 }
 
