@@ -1,6 +1,8 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert')
+const path = require('path')
 
 const ClientError = require('./exceptions/ClientError');
 
@@ -46,6 +48,9 @@ const _exports = require('./api/exports/index');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports/index');
 
+// Uploads
+const StorageService = require('./services/storage/StorageService')
+
 const init = async () => {
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
@@ -57,6 +62,8 @@ const init = async () => {
   const playlistsService =
     new PlaylistsService(playlistsSongsService, collaborationsService);
   const playlistActivitiesService = new PlaylistActivitiesService();
+
+  const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/covers'))
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -73,6 +80,9 @@ const init = async () => {
     {
       plugin: Jwt,
     },
+    {
+      plugin: Inert
+    }
   ]);
 
   // Define the authentication strategy jwt
@@ -97,7 +107,8 @@ const init = async () => {
         {
           plugin: albums,
           options: {
-            service: albumsService,
+            albumsService,
+            storageService,
             validator: AlbumsValidator,
           },
         },
