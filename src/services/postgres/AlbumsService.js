@@ -2,7 +2,7 @@ const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
-const {mapAlbumsDBtoModel} = require('../../utils')
+const {mapAlbumsDBtoModel} = require('../../utils');
 
 /**
  * ALbumsService to provide data from songs table
@@ -94,11 +94,16 @@ class AlbumsService {
     }
   }
 
+  /**
+   * Add cover to an album by id
+   * @param {String} id
+   * @param {String} cover
+   */
   async addAlbumCoverById(id, cover) {
     const query = {
       text: 'UPDATE albums SET cover = $1 WHERE id = $2',
       values: [cover, id],
-    }
+    };
 
     await this.pool.query(query);
   }

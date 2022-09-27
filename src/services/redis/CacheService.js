@@ -1,37 +1,59 @@
-const redis = require('redis')
-const config = require('../../utils/config')
+const redis = require('redis');
+const config = require('../../utils/config');
 
+/**
+ * CacheService class
+ */
 class CacheService {
-    constructor() {
-        this._client = redis.createClient({
-            socket: {
-                host: config.redis.host,
-            }
-        })
+  /**
+   * CacheService class constructor
+   */
+  constructor() {
+    this._client = redis.createClient({
+      socket: {
+        host: config.redis.host,
+      },
+    });
 
-        this._client.on('error', console.error)
+    this._client.on('error', console.error);
 
-        this._client.connect()
-    }
+    this._client.connect();
+  }
 
-    async set(key, value, expirationInSecond = 1800) {
-        await this._client.set(key, value, {
-            EX: expirationInSecond,
-        })
-    }
+  /**
+   * Set key in Redis client
+   * @param {String} key
+   * @param {String} value
+   * @param {Number} expirationInSecond
+   */
+  async set(key, value, expirationInSecond = 1800) {
+    await this._client.set(key, value, {
+      EX: expirationInSecond,
+    });
+  }
 
-    async get(key) {
-        const result = await this._client.get(key)
+  /**
+   * Get key from Redis client
+   * @param {string} key
+   * @return {string}
+   */
+  async get(key) {
+    const result = await this._client.get(key);
 
-        // if null then throw error
-        if (result === null) throw new Error('Cache tidak ditemukan')
+    // if null then throw error
+    if (result === null) throw new Error('Cache tidak ditemukan');
 
-        return result;
-    }
+    return result;
+  }
 
-    delete(key) {
-        return this._client.del(key)
-    }
+  /**
+   * Delete key from Redis client
+   * @param {string} key
+   * @return {Promise<number>}
+   */
+  delete(key) {
+    return this._client.del(key);
+  }
 }
 
 module.exports = CacheService;

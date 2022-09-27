@@ -1,6 +1,5 @@
 const {nanoid} = require('nanoid');
 const {Pool} = require('pg');
-const {mapSongsDBtoModel} = require('../../utils');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
@@ -74,7 +73,8 @@ class SongsService {
    */
   async getSongById(id) {
     const query = {
-      text: 'SELECT * FROM songs WHERE id = $1',
+      text: `SELECT id, title, year, performer, genre, duration 
+      FROM songs WHERE id = $1`,
       values: [id],
     };
 
@@ -84,7 +84,7 @@ class SongsService {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
 
-    return result.rows.map(mapSongsDBtoModel)[0];
+    return result.rows[0];
   }
 
   /**

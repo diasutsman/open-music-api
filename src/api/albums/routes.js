@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 
 const routes = (handler) => [
   {
@@ -29,19 +29,20 @@ const routes = (handler) => [
       payload: {
         allow: 'multipart/form-data',
         multipart: true,
-        maxBytes: 512_000, // set the maximum bytes size of payload, default: 1mb
+        // set the maximum bytes size of payload, default: 1mb
+        maxBytes: 512_000,
         output: 'stream',
       },
-    }
+    },
   },
   {
     method: 'GET',
     path: '/albums/{id}/{param*}',
     handler: {
       directory: {
-        path: path.resolve(__dirname, 'file')
-      }
-    }
+        path: path.resolve(__dirname, 'file'),
+      },
+    },
   },
   {
     method: 'POST',

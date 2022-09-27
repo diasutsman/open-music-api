@@ -1,6 +1,15 @@
 const autoBind = require('auto-bind');
 
+/**
+ * ExportsHandler class
+ */
 class ExportsHandler {
+  /**
+   * ExportsHandler class constructor
+   * @param {ProducerService} producerService
+   * @param {PlaylistsService} playlistsService
+   * @param {PlaylistsValidator} validator
+   */
   constructor(producerService, playlistsService, validator) {
     this._producerService = producerService;
     this._playlistsService = playlistsService;
@@ -9,6 +18,12 @@ class ExportsHandler {
     autoBind(this);
   }
 
+  /**
+   * For handling POST request to /export/playlists/{playlistId} endpoint
+   * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
+   * @return {Hapi.ResponseToolkit}
+   */
   async postExportPlaylistByIdHandler(request, h) {
     this._validator.validateExportPlaylistPayload(request.payload);
 
@@ -22,7 +37,9 @@ class ExportsHandler {
       targetEmail: request.payload.targetEmail,
     };
 
-    await this._producerService.sendMessage(`export:playlists`, JSON.stringify(message));
+    await this._producerService.sendMessage(
+        `export:playlists`, JSON.stringify(message),
+    );
 
     const response = h.response({
       status: 'success',

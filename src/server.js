@@ -1,8 +1,8 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
-const Inert = require('@hapi/inert')
-const path = require('path')
+const Inert = require('@hapi/inert');
+const path = require('path');
 
 const ClientError = require('./exceptions/ClientError');
 
@@ -49,7 +49,7 @@ const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports/index');
 
 // Uploads
-const StorageService = require('./services/storage/StorageService')
+const StorageService = require('./services/storage/StorageService');
 
 // Likes
 const AlbumsLikesService = require('./services/postgres/AlbumsLikesService');
@@ -70,9 +70,11 @@ const init = async () => {
     new PlaylistsService(playlistsSongsService, collaborationsService);
   const playlistActivitiesService = new PlaylistActivitiesService();
 
-  const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/covers'))
-  const cacheService = new CacheService()
-  const albumsLikesService = new AlbumsLikesService(cacheService)
+  const storageService = new StorageService(
+      path.resolve(__dirname, 'api/albums/file/covers'),
+  );
+  const cacheService = new CacheService();
+  const albumsLikesService = new AlbumsLikesService(cacheService);
 
 
   const server = Hapi.server({
@@ -91,8 +93,8 @@ const init = async () => {
       plugin: Jwt,
     },
     {
-      plugin: Inert
-    }
+      plugin: Inert,
+    },
   ]);
 
   // Define the authentication strategy jwt
