@@ -1,5 +1,5 @@
 const autoBind = require('auto-bind');
-
+const config = require('../../utils/config');
 /**
  * AlbumsHandler for handling request to /albums endpoint
  */
@@ -117,7 +117,7 @@ class AlbumsHandler {
     const filename = await this._storageService.writeFile(cover, cover.hapi);
 
     await this._albumsService.addAlbumCoverById(
-        id, `http://${process.env.HOST}:${process.env.PORT}/albums/${id}/covers/${filename}`,
+        id, `http://${config.app.host}:${config.app.host}/albums/${id}/covers/${filename}`,
     );
 
     const response = h.response({
