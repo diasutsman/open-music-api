@@ -1,5 +1,5 @@
-const { nanoid } = require('nanoid');
-const { Pool } = require('pg');
+const {nanoid} = require('nanoid');
+const {Pool} = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
@@ -8,6 +8,7 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 class PlaylistsActivitiesService {
   /**
    * Playlists activities service constructor.
+   * @param {CacheService} cacheService
    */
   constructor(cacheService) {
     this._pool = new Pool();
@@ -47,8 +48,13 @@ class PlaylistsActivitiesService {
    */
   async getPlaylistActivities(playlistId) {
     try {
-      const playlistActivities = await this._cacheService.get(`playlist-activities:${playlistId}`);
-      return JSON.parse(playlistActivities);
+      const playlistActivities = await this._cacheService.get(
+          `playlist-activities:${playlistId}`,
+      );
+      return {
+        activities: JSON.parse(playlistActivities),
+        cache: 'cache',
+      };
     } catch (error) {
       const query = {
         text: `SELECT playlist_song_activities.*, users.username, songs.title 
@@ -65,9 +71,11 @@ class PlaylistsActivitiesService {
         throw new NotFoundError('Playlist tidak ditemukan');
       }
 
-      await this._cacheService.set(`playlist-activities:${playlistId}`, JSON.stringify(result.rows));
+      await this._cacheService.set(
+          `playlist-activities:${playlistId}`, JSON.stringify(result.rows),
+      );
 
-      return result.rows;
+      return {activities: result.rows};
     }
   }
 }

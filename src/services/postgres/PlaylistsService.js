@@ -11,6 +11,7 @@ class PlaylistsService {
    * Constructor.
    * @param {PlaylistsSongsService} playlistsSongsService
    * @param {CollaborationsService} collaborationsService
+   * @param {CacheService} cacheService
    */
   constructor(playlistsSongsService, collaborationsService, cacheService) {
     this._pool = new Pool();
@@ -50,21 +51,24 @@ class PlaylistsService {
   async getPlaylists(owner) {
     try {
       const result = await this._cacheService.get(`playlists:${owner}`);
-      return JSON.parse(result);
+      return {playlists: JSON.parse(result), cache: 'cache'};
     } catch (error) {
       const query = {
-        text: `SELECT playlists.id, playlists.name, users.username FROM playlists
-              LEFT JOIN users ON playlists.owner = users.id
-              LEFT JOIN collaborations ON 
-                        collaborations.playlist_id = playlists.id
-              WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
+        text: `
+        SELECT playlists.id, playlists.name, users.username FROM playlists
+        LEFT JOIN users ON playlists.owner = users.id
+        LEFT JOIN collaborations ON 
+        collaborations.playlist_id = playlists.id
+        WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
         values: [owner],
       };
-  
+
       const result = await this._pool.query(query);
 
-      await this._cacheService.set(`playlists:${owner}`, JSON.stringify(result.rows));
-      return result.rows;
+      await this._cacheService.set(
+          `playlists:${owner}`, JSON.stringify(result.rows),
+      );
+      return {playlists: result.rows};
     }
   }
 

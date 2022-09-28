@@ -10,6 +10,7 @@ class CollaborationsService {
   /**
    * Collaborations service constructor.
    * @param {UsersService} usersService
+   * @param {CacheService} cacheService
    */
   constructor(usersService, cacheService) {
     this._pool = new Pool();

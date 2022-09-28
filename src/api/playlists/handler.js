@@ -47,18 +47,25 @@ class PlaylistsHandler {
   /**
    * Get playlists handler
    * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
    * @return {Hapi.ResponseObject}
    */
-  async getPlaylistsHandler(request) {
+  async getPlaylistsHandler(request, h) {
     const {id: credentialId} = request.auth.credentials;
-    const playlists = await this._playlistService.getPlaylists(credentialId);
+    const {playlists, cache} = await this._playlistService.getPlaylists(
+        credentialId,
+    );
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlists,
       },
-    };
+    });
+
+    cache && response.headers('X-Data-Source', cache);
+
+    return response;
   }
 
   /**
@@ -153,23 +160,30 @@ class PlaylistsHandler {
   /**
    * Get activities from playlist handler
    * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
    * @return {Hapi.ResponseObject}
    */
-  async getActivitiesFromPlaylistHandler(request) {
+  async getActivitiesFromPlaylistHandler(request, h) {
     const {id: playlistId} = request.params;
     const {id: credentialId} = request.auth.credentials;
 
     await this._playlistService.verifyPlaylistAccess(playlistId, credentialId);
-    const activities =
-      await this._playlistActivitiesService.getPlaylistActivities(playlistId);
+    const {activities, cache} =
+      await this._playlistActivitiesService.getPlaylistActivities(
+          playlistId,
+      );
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlistId,
         activities,
       },
-    };
+    });
+
+    cache && response.header('X-Data-Source', cache);
+
+    return response;
   }
 }
 
