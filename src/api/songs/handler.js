@@ -69,7 +69,7 @@ class SongsHandler {
       },
     });
 
-    cache && response.header('X-Data-Source', cache)
+    cache && response.header('X-Data-Source', cache);
 
     return response;
   }

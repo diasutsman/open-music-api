@@ -59,9 +59,9 @@ class AlbumsHandler {
       data: {
         album,
       },
-    })
+    });
 
-    cache && response.header('X-Data-Source', cache)
+    cache && response.header('X-Data-Source', cache);
 
     return response;
   }

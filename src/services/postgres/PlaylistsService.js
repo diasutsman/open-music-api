@@ -1,5 +1,5 @@
-const { nanoid } = require('nanoid');
-const { Pool } = require('pg');
+const {nanoid} = require('nanoid');
+const {Pool} = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
@@ -51,7 +51,7 @@ class PlaylistsService {
   async getPlaylists(owner) {
     try {
       const result = await this._cacheService.get(`playlists:${owner}`);
-      return { playlists: JSON.parse(result), cache: 'cache' };
+      return {playlists: JSON.parse(result), cache: 'cache'};
     } catch (error) {
       const query = {
         text: `
@@ -66,9 +66,9 @@ class PlaylistsService {
       const result = await this._pool.query(query);
 
       await this._cacheService.set(
-        `playlists:${owner}`, JSON.stringify(result.rows),
+          `playlists:${owner}`, JSON.stringify(result.rows),
       );
-      return { playlists: result.rows };
+      return {playlists: result.rows};
     }
   }
 
@@ -78,7 +78,7 @@ class PlaylistsService {
    */
   async deletePlaylistById(id) {
     const query = {
-      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id, owner',
+      text: `DELETE FROM playlists WHERE id = $1 RETURNING id, owner`,
       values: [id],
     };
 
@@ -89,6 +89,8 @@ class PlaylistsService {
     }
 
     await this._deletePlaylistsCache(result.rows[0].owner);
+    await this._deleteSongsCache(id);
+    await this._cacheService.delete(`playlist-activities:${id}`);
   }
 
   /**
@@ -132,9 +134,8 @@ class PlaylistsService {
       }
 
       await this._collaborationsService.verifyCollaborator(
-        playlistId, userId,
+          playlistId, userId,
       );
-
     }
   }
 
@@ -145,7 +146,7 @@ class PlaylistsService {
    */
   async addSongToPlaylistById(id, songId) {
     await this._playlistsSongsService.addPlaylistSong(id, songId);
-    await this._deleteSongsCache(id)
+    await this._deleteSongsCache(id);
   }
 
   /**
@@ -155,13 +156,16 @@ class PlaylistsService {
    */
   async getPlaylistSongsById(id) {
     try {
-      const playlist = JSON.parse(await this._cacheService.get(`playlistsongs:${id}`))
-      return { playlist, cache: 'cache' }
+      const playlist = JSON.parse(
+          await this._cacheService.get(`playlistsongs:${id}`),
+      );
+      return {playlist, cache: 'cache'};
     } catch (error) {
       const query = {
-        text: `SELECT playlists.id, playlists.name, users.username FROM playlists
-              LEFT JOIN users ON playlists.owner = users.id
-              WHERE playlists.id = $1`,
+        text: `SELECT playlists.id, playlists.name, users.username 
+        FROM playlists
+        LEFT JOIN users ON playlists.owner = users.id
+        WHERE playlists.id = $1`,
         values: [id],
       };
 
@@ -177,9 +181,12 @@ class PlaylistsService {
         values: [id],
       })).rows;
 
-      await this._cacheService.set(`playlistsongs:${id}`, JSON.stringify(playlist))
+      await this._cacheService.set(
+          `playlistsongs:${id}`,
+          JSON.stringify(playlist),
+      );
 
-      return { playlist };
+      return {playlist};
     }
   }
 
@@ -190,15 +197,25 @@ class PlaylistsService {
    */
   async deletePlaylistSongsById(id, songId) {
     await this._playlistsSongsService.deletePlaylistSong(id, songId);
-    await this._deleteSongsCache(id)
+    await this._deleteSongsCache(id);
   }
 
+  /**
+   * Delete playlist cache of given owner
+   * @param {string} owner
+   * @return {Promise<number>}
+   */
   _deletePlaylistsCache(owner) {
-    return this._cacheService.delete(`playlists:${owner}`)
+    return this._cacheService.delete(`playlists:${owner}`);
   }
 
+  /**
+   * Delete songs playlist cache by given id
+   * @param {string} id
+   * @return {Promise<number>}
+   */
   _deleteSongsCache(id) {
-    return this._cacheService.delete(`playlistsongs:${id}`)
+    return this._cacheService.delete(`playlistsongs:${id}`);
   }
 }
 

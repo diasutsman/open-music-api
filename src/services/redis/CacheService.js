@@ -51,8 +51,8 @@ class CacheService {
    * @param {string} key
    * @return {Promise<number>}
    */
-  delete(key) {
-    return this._client.del(key);
+  delete(...key) {
+    return this._client.del(...key);
   }
 }
 

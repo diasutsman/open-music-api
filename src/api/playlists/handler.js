@@ -117,6 +117,7 @@ class PlaylistsHandler {
   /**
    * Get songs from playlist handler
    * @param {Hapi.Request} request
+   * @param {Hapi.ResponseToolkit} h
    * @return {Hapi.ResponseObject}
    */
   async getSongsFromPlaylistHandler(request, h) {
@@ -124,7 +125,9 @@ class PlaylistsHandler {
     const {id: credentialId} = request.auth.credentials;
 
     await this._playlistService.verifyPlaylistAccess(id, credentialId);
-    const {playlist, cache} = await this._playlistService.getPlaylistSongsById(id);
+    const {
+      playlist, cache,
+    } = await this._playlistService.getPlaylistSongsById(id);
 
     const response = h.response({
       status: 'success',
@@ -133,7 +136,7 @@ class PlaylistsHandler {
       },
     });
 
-    cache && response.header('X-Data-Source', cache)
+    cache && response.header('X-Data-Source', cache);
 
     return response;
   }
