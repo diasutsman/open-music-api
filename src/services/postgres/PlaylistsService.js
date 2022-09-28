@@ -78,17 +78,20 @@ class PlaylistsService {
    */
   async deletePlaylistById(id) {
     const query = {
-      text: `DELETE FROM playlists WHERE id = $1 RETURNING id, owner`,
+      text: `DELETE FROM playlists
+      WHERE id = $1 RETURNING id, owner`,
       values: [id],
     };
 
     const result = await this._pool.query(query);
 
+    const {owner} = result.rows[0];
+
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus playlist. Id tidak ditemukan');
     }
 
-    await this._deletePlaylistsCache(result.rows[0].owner);
+    await this._deletePlaylistsCache(owner);
     await this._deleteSongsCache(id);
     await this._cacheService.delete(`playlist-activities:${id}`);
   }
