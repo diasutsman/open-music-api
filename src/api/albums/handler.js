@@ -117,7 +117,7 @@ class AlbumsHandler {
     const filename = await this._storageService.writeFile(cover, cover.hapi);
 
     await this._albumsService.addAlbumCoverById(
-        id, `http://${config.app.host}:${config.app.host}/albums/${id}/covers/${filename}`,
+        id, `http://${config.app.host}:${config.app.port}/albums/${id}/covers/${filename}`,
     );
 
     const response = h.response({
