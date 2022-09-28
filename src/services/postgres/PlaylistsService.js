@@ -1,5 +1,5 @@
-const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
+const { nanoid } = require('nanoid');
+const { Pool } = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
@@ -39,7 +39,7 @@ class PlaylistsService {
       throw new InvariantError('Playlist gagal ditambahkan');
     }
 
-    await this._cacheService.delete(`playlists:${owner}`);
+    await this._deletePlaylistsCache(owner);
     return result.rows[0].id;
   }
 
@@ -51,7 +51,7 @@ class PlaylistsService {
   async getPlaylists(owner) {
     try {
       const result = await this._cacheService.get(`playlists:${owner}`);
-      return {playlists: JSON.parse(result), cache: 'cache'};
+      return { playlists: JSON.parse(result), cache: 'cache' };
     } catch (error) {
       const query = {
         text: `
@@ -66,9 +66,9 @@ class PlaylistsService {
       const result = await this._pool.query(query);
 
       await this._cacheService.set(
-          `playlists:${owner}`, JSON.stringify(result.rows),
+        `playlists:${owner}`, JSON.stringify(result.rows),
       );
-      return {playlists: result.rows};
+      return { playlists: result.rows };
     }
   }
 
@@ -88,7 +88,7 @@ class PlaylistsService {
       throw new NotFoundError('Gagal menghapus playlist. Id tidak ditemukan');
     }
 
-    await this._cacheService.delete(`playlists:${result.rows[0].owner}`);
+    await this._deletePlaylistsCache(result.rows[0].owner);
   }
 
   /**
@@ -131,13 +131,10 @@ class PlaylistsService {
         throw error;
       }
 
-      try {
-        await this._collaborationsService.verifyCollaborator(
-            playlistId, userId,
-        );
-      } catch {
-        throw error;
-      }
+      await this._collaborationsService.verifyCollaborator(
+        playlistId, userId,
+      );
+
     }
   }
 
@@ -148,6 +145,7 @@ class PlaylistsService {
    */
   async addSongToPlaylistById(id, songId) {
     await this._playlistsSongsService.addPlaylistSong(id, songId);
+    await this._deleteSongsCache(id)
   }
 
   /**
@@ -156,26 +154,33 @@ class PlaylistsService {
    * @return {Promise<any[]>}
    */
   async getPlaylistSongsById(id) {
-    const query = {
-      text: `SELECT playlists.id, playlists.name, users.username FROM playlists
-            LEFT JOIN users ON playlists.owner = users.id
-            WHERE playlists.id = $1`,
-      values: [id],
-    };
+    try {
+      const playlist = JSON.parse(await this._cacheService.get(`playlistsongs:${id}`))
+      return { playlist, cache: 'cache' }
+    } catch (error) {
+      const query = {
+        text: `SELECT playlists.id, playlists.name, users.username FROM playlists
+              LEFT JOIN users ON playlists.owner = users.id
+              WHERE playlists.id = $1`,
+        values: [id],
+      };
 
-    const result = await this._pool.query(query);
+      const result = await this._pool.query(query);
 
-    const [playlist] = result.rows;
+      const [playlist] = result.rows;
 
-    playlist.songs = (await this._pool.query({
-      text: `SELECT songs.id, songs.title, songs.performer FROM songs
-            LEFT JOIN playlists_songs ON playlists_songs.song_id = songs.id
-            WHERE playlists_songs.playlist_id = $1
-            GROUP BY songs.id`,
-      values: [id],
-    })).rows;
+      playlist.songs = (await this._pool.query({
+        text: `SELECT songs.id, songs.title, songs.performer FROM songs
+              LEFT JOIN playlists_songs ON playlists_songs.song_id = songs.id
+              WHERE playlists_songs.playlist_id = $1
+              GROUP BY songs.id`,
+        values: [id],
+      })).rows;
 
-    return playlist;
+      await this._cacheService.set(`playlistsongs:${id}`, JSON.stringify(playlist))
+
+      return { playlist };
+    }
   }
 
   /**
@@ -185,6 +190,15 @@ class PlaylistsService {
    */
   async deletePlaylistSongsById(id, songId) {
     await this._playlistsSongsService.deletePlaylistSong(id, songId);
+    await this._deleteSongsCache(id)
+  }
+
+  _deletePlaylistsCache(owner) {
+    return this._cacheService.delete(`playlists:${owner}`)
+  }
+
+  _deleteSongsCache(id) {
+    return this._cacheService.delete(`playlistsongs:${id}`)
   }
 }
 

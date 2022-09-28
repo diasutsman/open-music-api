@@ -1,8 +1,8 @@
-const {nanoid} = require('nanoid');
-const {Pool} = require('pg');
+const { nanoid } = require('nanoid');
+const { Pool } = require('pg');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
-const {mapAlbumsDBtoModel} = require('../../utils');
+const { mapAlbumsDBtoModel } = require('../../utils');
 
 /**
  * ALbumsService to provide data from songs table
@@ -11,8 +11,9 @@ class AlbumsService {
   /**
    * Constructor to create new instance of ALbumsService that initialize pool
    */
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   /**
@@ -20,7 +21,7 @@ class AlbumsService {
    * @param {{name: string, year: number}} postReqBody
    * @return {Promise<string>}
    */
-  async addAlbum({name, year}) {
+  async addAlbum({ name, year }) {
     const id = `album-${nanoid(16)}`;
 
     const query = {
@@ -42,31 +43,38 @@ class AlbumsService {
    * @return {Promise<any>}
    */
   async getAlbumById(id) {
-    const query = {
-      text: 'SELECT * FROM albums WHERE id = $1',
-      values: [id],
-    };
+    try {
+      const album = await this._cacheService.get(`albums:${id}`);
+      return {album: JSON.parse(album), cache: 'cache'};
+    } catch (error) {
+      const query = {
+        text: 'SELECT * FROM albums WHERE id = $1',
+        values: [id],
+      };
 
-    const result = await this._pool.query(query);
-    if (!result.rowCount) {
-      throw new NotFoundError('Album tidak ditemukan');
+      const result = await this._pool.query(query);
+      if (!result.rowCount) {
+        throw new NotFoundError('Album tidak ditemukan');
+      }
+
+      const [album] = result.rows.map(mapAlbumsDBtoModel);
+
+      album.songs = (await this._pool.query({
+        text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
+        values: [id],
+      })).rows;
+
+      this._cacheService.set(`albums:${id}`, JSON.stringify(album));
+
+      return {album};
     }
-
-    const [album] = result.rows.map(mapAlbumsDBtoModel);
-
-    album.songs = (await this._pool.query({
-      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
-      values: [id],
-    })).rows;
-
-    return album;
   }
   /**
    * Edit album by id
    * @param {string} id
    * @param {{name: string, year: number}} putReqBody
    */
-  async editAlbumById(id, {name, year}) {
+  async editAlbumById(id, { name, year }) {
     const query = {
       text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3 RETURNING id',
       values: [name, year, id],
@@ -77,6 +85,7 @@ class AlbumsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
     }
+    await this._deleteAlbumCache(id)
   }
   /**
    * Delete album by id
@@ -92,6 +101,8 @@ class AlbumsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus album. Id tidak ditemukan');
     }
+
+    await this._deleteAlbumCache(id)
   }
 
   /**
@@ -106,6 +117,12 @@ class AlbumsService {
     };
 
     await this._pool.query(query);
+    
+    await this._deleteAlbumCache(id)
+  }
+
+  _deleteAlbumCache(id) {
+    return this._cacheService.delete(`albums:${id}`);
   }
 }
 

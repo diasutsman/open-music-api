@@ -59,25 +59,30 @@ const CacheService = require('./services/redis/CacheService');
 const config = require('./utils/config');
 
 const init = async () => {
-  const cacheService = new CacheService();
-  const albumsService = new AlbumsService();
-  const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
 
-  const playlistsSongsService = new PlaylistSongsService(songsService);
+  const cacheService = new CacheService();
+
+  // All Cached Services
   const collaborationsService = new CollaborationsService(
-      usersService, cacheService,
+    usersService, cacheService,
   );
+  const songsService = new SongsService(cacheService);
+  const playlistsSongsService = new PlaylistSongsService(songsService);
   const playlistsService = new PlaylistsService(
-      playlistsSongsService, collaborationsService, cacheService,
+    playlistsSongsService,
+    collaborationsService,
+    cacheService,
   );
   const playlistActivitiesService = new PlaylistActivitiesService(cacheService);
-
-  const storageService = new StorageService(
-      path.resolve(__dirname, 'api/albums/file/covers'),
-  );
+  const albumsService = new AlbumsService(cacheService);
   const albumsLikesService = new AlbumsLikesService(cacheService);
+
+  // Storage Service
+  const storageService = new StorageService(
+    path.resolve(__dirname, 'api/albums/file/covers'),
+  );
 
 
   const server = Hapi.server({
@@ -118,70 +123,70 @@ const init = async () => {
   });
 
   await server.register(
-      [
-        {
-          plugin: albums,
-          options: {
-            albumsService,
-            storageService,
-            albumsLikesService,
-            validator: AlbumsValidator,
-          },
+    [
+      {
+        plugin: albums,
+        options: {
+          albumsService,
+          storageService,
+          albumsLikesService,
+          validator: AlbumsValidator,
         },
-        {
-          plugin: songs,
-          options: {
-            service: songsService,
-            validator: SongsValidator,
-          },
+      },
+      {
+        plugin: songs,
+        options: {
+          service: songsService,
+          validator: SongsValidator,
         },
-        {
-          plugin: users,
-          options: {
-            service: usersService,
-            validator: UsersValidator,
-          },
+      },
+      {
+        plugin: users,
+        options: {
+          service: usersService,
+          validator: UsersValidator,
         },
-        {
-          plugin: authentications,
-          options: {
-            authenticationsService,
-            usersService,
-            tokenManager: TokenManager,
-            validator: AuthenticationsValidator,
-          },
+      },
+      {
+        plugin: authentications,
+        options: {
+          authenticationsService,
+          usersService,
+          tokenManager: TokenManager,
+          validator: AuthenticationsValidator,
         },
-        {
-          plugin: playlists,
-          options: {
-            playlistsService,
-            playlistActivitiesService,
-            validator: PlaylistsValidator,
-          },
+      },
+      {
+        plugin: playlists,
+        options: {
+          playlistsService,
+          playlistActivitiesService,
+          validator: PlaylistsValidator,
         },
-        {
-          plugin: collaborations,
-          options: {
-            collaborationsService,
-            playlistsService,
-            validator: CollaborationsValidator,
-          },
+      },
+      {
+        plugin: collaborations,
+        options: {
+          collaborationsService,
+          playlistsService,
+          validator: CollaborationsValidator,
         },
-        {
-          plugin: _exports,
-          options: {
-            producerService: ProducerService,
-            playlistsService,
-            validator: ExportsValidator,
-          },
+      },
+      {
+        plugin: _exports,
+        options: {
+          producerService: ProducerService,
+          playlistsService,
+          validator: ExportsValidator,
         },
-      ],
+      },
+    ],
   );
 
   // Handling error before response
   server.ext('onPreResponse', (request, h) => {
     // Get response from request
-    const {response} = request;
+    const { response } = request;
 
     if (response instanceof Error) {
       // Check if response is instance of ClientError

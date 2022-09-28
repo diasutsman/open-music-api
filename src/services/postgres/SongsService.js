@@ -9,8 +9,9 @@ class SongsService {
   /**
    * Constructor to create new instance of SongsService that initialize pool
    */
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService
   }
 
   /**
@@ -72,19 +73,26 @@ class SongsService {
    * @return {Promise<any>}
    */
   async getSongById(id) {
-    const query = {
-      text: `SELECT id, title, year, performer, genre, duration 
-      FROM songs WHERE id = $1`,
-      values: [id],
-    };
+    try {
+      const song = JSON.parse(await this._cacheService.get(`song:${id}`))
+      return {song, cache: 'cache'}
+    } catch (error) {
+      const query = {
+        text: `SELECT id, title, year, performer, genre, duration 
+        FROM songs WHERE id = $1`,
+        values: [id],
+      };
+  
+      const result = await this._pool.query(query);
+  
+      if (!result.rowCount) {
+        throw new NotFoundError('Lagu tidak ditemukan');
+      }
+      
+      const [song] = result.rows
 
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('Lagu tidak ditemukan');
+      return {song};
     }
-
-    return result.rows[0];
   }
 
   /**
@@ -121,6 +129,8 @@ class SongsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
     }
+
+    await this._deleteSongCache(id)
   }
 
   /**
@@ -138,6 +148,12 @@ class SongsService {
     if (!result.rowCount) {
       throw new NotFoundError('Gagal menghapus lagu. Id tidak ditemukan');
     }
+
+    await this._deleteSongCache(id)
+  }
+
+  _deleteSongCache(id) {
+    return this._cacheService.delete(`song:${id}`)
   }
 }
 

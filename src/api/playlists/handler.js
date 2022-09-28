@@ -63,7 +63,7 @@ class PlaylistsHandler {
       },
     });
 
-    cache && response.headers('X-Data-Source', cache);
+    cache && response.header('X-Data-Source', cache);
 
     return response;
   }
@@ -119,19 +119,23 @@ class PlaylistsHandler {
    * @param {Hapi.Request} request
    * @return {Hapi.ResponseObject}
    */
-  async getSongsFromPlaylistHandler(request) {
+  async getSongsFromPlaylistHandler(request, h) {
     const {id} = request.params;
     const {id: credentialId} = request.auth.credentials;
 
     await this._playlistService.verifyPlaylistAccess(id, credentialId);
-    const playlist = await this._playlistService.getPlaylistSongsById(id);
+    const {playlist, cache} = await this._playlistService.getPlaylistSongsById(id);
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlist,
       },
-    };
+    });
+
+    cache && response.header('X-Data-Source', cache)
+
+    return response;
   }
 
   /**

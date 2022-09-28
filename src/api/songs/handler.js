@@ -60,14 +60,18 @@ class SongsHandler {
    */
   async getSongByIdHandler(request, h) {
     const {id} = request.params;
-    const song = await this._service.getSongById(id);
+    const {song, cache} = await this._service.getSongById(id);
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         song,
       },
-    };
+    });
+
+    cache && response.header('X-Data-Source', cache)
+
+    return response;
   }
 
   /**
